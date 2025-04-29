@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from os import getenv
 from dotenv import load_dotenv
-import os
+
 
 load_dotenv()
 
@@ -85,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'database3834',
         'USER': 'm_umrbekkk',
-        'PASSWORD': os.getenv("DATABASE_PASSWORD"),
+        'PASSWORD': getenv("DATABASE_PASSWORD"),
         'HOST': 'dpg-d08dpafdiees7398bfhg-a.oregon-postgres.render.com',
         'PORT': '5432',
     }
@@ -128,9 +128,15 @@ USE_TZ = True
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STATIC_URL = "static/"
 
-STATICFILES_DIRS = [BASE_DIR / "static"]
+if DEBUG:
+    # Development static files settings
+    STATICFILES_DIRS = [BASE_DIR / "static"]
+    STATIC_URL = "static/"
+else:
+    # Production static files settings
+    STATIC_URL = "/static/"
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

@@ -3,3 +3,4 @@
 .vscode
 static
 .ebextentions
+db.sqlite3
