@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+{{ post.title }}
+{% endblock %}
+{% block css_files %}
+<link rel="stylesheet" href='{% static "blog/post-detail.css" %}' />
+{% endblock %}
+{% block content %}
+{% if comment_form.errors %}
+<div id="alert">
+    <h2>Ooops! Some error occured while submitting the comment!</h2>
+    <p>See the comment form issues and try resubmitting</p>
+    <a href="#comment-form">Fix!</a>
+</div>
+{% endif %}
+<section id='summary'>
+    <div class="container">
+        <div class="content-area">
+            <h2>{{ post.title }}</h2>
+            <div id='tags'>
+                {% for tag in post_tags %}
+                <span class='tag'>#{{ tag.caption }}</span>
+                {% endfor %}
+            </div>
+            <div id='read-later'>
+                <form action='{% url "stored-posts-page" %}' method="POST">
+                    {% csrf_token %}
+                    {% if post.id in stored_post_ids %}
+                    <p>Currently in your reading list</p>
+                    <input type="hidden" name="post_id" value="{{ post.id }}">
+                    <input type="hidden" name="post_slug" value="{{ post.slug }}">
+                    <button>Remove from Read Later</button>
+                    {% else %}
+                    <input type="hidden" name="post_id" value="{{ post.id }}">
+                    <input type="hidden" name="post_slug" value="{{ post.slug }}">
+                    <button>Read Later</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        <article>
+            <div class="post-image">
+                <img src="{{ post.image.url }}" alt="{{post.title}}">
+            </div>
+            <div class="post-meta">
+                <address>By <a href="mailto:{{ post.author.email }}">{{post.author}}</a></address>
+                <div class="date">
+                    Last updated <time>{{post.date|date:"d M Y"}}</time>
+                </div>
+            </div>
+        </article>
+    </div>
+</section>
+<main>
+    <p>{{ post.content }}</p>
+</main>
+<section id="comments">
+    <h1>Comments Section</h1>
+    <hr>
+    <br>
+    <ul>
+        {% if comments %}
+        {% for comment in comments %}
+        <li>
+            <h3>{{ comment.user.username }} {% if comment.user.id == request.user.id %} <span
+                    style="font-size: smaller;">(you)</span> {% endif %}</h3>
+            <p>{{ comment.text|linebreaks }}</p>
+        </li>
+        {% endfor %}
+        {% else %}
+        <li>
+            <p>No comments yet!</p>
+        </li>
+        {% endif %}
+    </ul>
+</section>
+<section id="comment-form">
+    <form action='{% url "post-detail-page" post.slug %}#comments' method="POST">
+        {% csrf_token %}
+        {% for field in comment_form %}
+        <div class="form-control {% if field.errors %}invalid{% endif %}">
+            {{ field.label_tag }}
+            {{ field }}
+            {{ field.errors }}
+        </div>
+        {% endfor %}
+        <button>Save Comment</button>
+    </form>
+</section>
+{% endblock %}
